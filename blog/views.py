@@ -3,10 +3,10 @@ from .models import Post, PublishedManager
 
 def post_list(request):
     posts = Post.published.all()
-    return render(request, 'blog/list.html', {'posts': posts})
+    return render(request, 'blog/post/list.html', {'posts': posts})
 
-def post_detail(request, year, month, day, post):
-    post = get_object_or_404(Post, slug=post, status='published', publish__year=year,
+def post_detail(request, year, month, day, post_slug):
+    post = get_object_or_404(Post, slug=post_slug, status='опубликован', publish__year=year,
                              publish__month=month, publish__day=day)
-    return render(request, 'blog/detail.html', {'post': post})
+    return render(request, 'blog/post/detail.html', {'post': post})
 
