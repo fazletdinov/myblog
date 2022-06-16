@@ -4,20 +4,28 @@ from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.views.generic import ListView
 from .forms import EmailPostForm, CommentForm
 from django.core.mail import send_mail
+from taggit.models import Tag
+from django.db.models import Count
 
-#def post_list(request):
-#    object_list = Post.published.all()
-#    paginator = Paginator(object_list, 3) # По 3 статьи на каждой странице
-#    page = request.GET.get('page')
-#    try:
-#        posts = paginator.page(page)
-#    except PageNotAnInteger:
-#        # Если страница не является целым числом, возращаем первую страницу
-#        posts = paginator.page(1)
-#    except EmptyPage:
-#        # Если номер страницы больше, чем общее количество страниц, возращаем последнюю.
-#        posts = paginator.page(paginator.num_pages)
-#    return render(request, 'blog/post/list.html', {'posts': posts, 'page': page})
+def post_list(request, tag_slug=None):
+    object_list = Post.published.all()
+    tag = None
+
+    if tag_slug:
+        tag = get_object_or_404(Tag, slug=tag_slug)
+        object_list = object_list.filter(tags__in=[tag])
+
+    paginator = Paginator(object_list, 3) # По 3 статьи на каждой странице
+    page = request.GET.get('page')
+    try:
+        posts = paginator.page(page)
+    except PageNotAnInteger:
+        # Если страница не является целым числом, возращаем первую страницу
+        posts = paginator.page(1)
+    except EmptyPage:
+        # Если номер страницы больше, чем общее количество страниц, возращаем последнюю.
+        posts = paginator.page(paginator.num_pages)
+    return render(request, 'blog/post/list.html', {'posts': posts, 'tag': tag})
 
 class PostListView(ListView):
     queryset = Post.published.all()
