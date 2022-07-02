@@ -2,6 +2,14 @@
 {% block title %}{{ post.title}}{% endblock %}
 {% block content %}
     <h1>{{ post.title }}</h1>
+    <h3>Похожие статьи:</h3>
+        {% for post in similar_posts %}
+            <p>
+                <a href="{{ post.get_absolute_url }}">{{ post.title }}</a>
+            </p>
+        {% empty %}
+            <p>Пободных постов пока нет.</p>
+        {% endfor %}
     <p class="date">Публикация {{ post.publish }} от {{ post.author }} Статус: {{ post.status }}</p>
     {{ post.body|linebreaks }}
     <p>
