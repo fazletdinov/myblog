@@ -24,19 +24,31 @@ h1 {
     background-color: whitesmoke;
 }
 
-#content, #sidebar {
+main, aside {
     display: inline-block;
     float: left;
     padding: 20px;
     height: 100%;
 }
 
-#content {
+main {
     width: 70%;
 }
 
-#sidebar {
+aside {
     width: 30%;
     background-color: lightgrey;
     height: 100%
+}
+
+body aside p a:hover {
+    color: #eb5959;
+    text-decoration: none;
+    transform: scale(1.05);
+}
+
+body main h2 a:hover, p a:hover {
+    color: #eb5959;
+    text-decoration: none;
+    transform: scale(1.05);
 }

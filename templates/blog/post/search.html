@@ -2,6 +2,7 @@
 {% block title %}Поиск{% endblock %}
 
 {% block content %}
+<p><a href="{% url 'blog:post_list' %}">Вернуться на главную страницу</a></p>
     {% if query %}
         <h1>Посты, содерщащие "{{ query }}"</h1>
         <h3>
