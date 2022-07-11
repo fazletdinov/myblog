@@ -1,12 +1,15 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from .models import Post, Comments
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
-from django.views.generic import ListView
-from .forms import EmailPostForm, CommentForm, SearchForm
+from django.views.generic import CreateView, ListView
+from .forms import *
 from django.core.mail import send_mail
 from taggit.models import Tag
 from django.db.models import Count
 from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank, TrigramSimilarity
+from django.contrib.auth import logout, login
+from django.contrib.auth.views import LoginView
+from django.urls import reverse_lazy
 
 def post_list(request, tag_slug=None):
     object_list = Post.published.all()
@@ -90,7 +93,33 @@ def post_search(request):
                 .filter(rank__gte=0.3).order_by('-rank')
     return render(request, 'blog/post/search.html', {'form': form, 'query': query, 'results': results})
 
+def create(request):
+    if request.method == "POST":
+        form = AddPostForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('blog:post_list')
+    else:
+        form = AddPostForm()
+    return render(request, 'blog/post/add_post.html', {'form': form})
 
+class RegisterUser(CreateView):
+    form_class = RegisterUserForm
+    template_name = 'blog/post/register.html'
+    success_url = reverse_lazy('blog:login')
 
+    def form_valid(self, form):
+        user = form.save()
+        login(self.request, user)
+        return redirect('blog:post_list')
 
+class LoginUser(LoginView):
+    form_class = LogonUserForm
+    template_name = 'blog/post/login.html'
 
+    def get_success_url(self):
+        return reverse_lazy('blog:post_list')
+
+def logout_user(request):
+    logout(request)
+    return redirect('blog:login')

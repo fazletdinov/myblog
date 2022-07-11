@@ -1,23 +1,17 @@
-#!/bin/bash
+#!/bin/sh
 
-# wait for Postgres to start
-function postgres_ready(){
-python << END
-import sys
-import psycopg2
-try:
-    conn = psycopg2.connect(dbname="blog", user="blog", password="blog", hosе="")
-except psycopg2.OperationalError:
-    sys.exit(-1)
-sys.exit(0)
-END
-}
+if [ "$DATABASE" = "postgres" ]
+then
+    echo "Waiting for postgres..."
 
-until postgres_ready; do
-  >&2 echo "Postgres is unavailable - sleeping"
-  sleep 10
-done
+    while ! nc -z $SQL_HOST $SQL_PORT; do
+      sleep 0.1
+    done
 
-python manage.py migrate
+    echo "PostgreSQL started"
+fi
 
-gunicorn pft.wsgi:application -w 2 -b 0.0.0.0:8000 --reload
+#python manage.py flush --no-input
+#python manage.py migrate
+
+exec "$@"
