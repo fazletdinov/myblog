@@ -35,8 +35,8 @@
     {% else %}
         <h2>Добавить новый комментарий.</h2>
         <form action="." method="post">
-            {{ comment_form.as_p }}
             {% csrf_token %}
+            {{ comment_form.as_p }}
             <p><input type="submit" value="Добавить комментарий"></p>
         </form>
     {% endif %}

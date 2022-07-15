@@ -10,6 +10,8 @@ from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
 from django.contrib.auth import logout, login
 from django.contrib.auth.views import LoginView
 from django.urls import reverse_lazy
+from django.views.decorators.csrf import csrf_exempt, csrf_protect
+from django.utils.decorators import method_decorator
 
 def post_list(request, tag_slug=None):
     object_list = Post.published.all()
@@ -37,6 +39,7 @@ class PostListView(ListView):
     paginate_by = 3
     template_name = 'blog/post/list.html'
 
+@csrf_protect
 def post_detail(request, year, month, day, post_slug):
     post = get_object_or_404(Post, slug=post_slug, status='опубликован', publish__year=year,
                              publish__month=month, publish__day=day)
@@ -59,7 +62,7 @@ def post_detail(request, year, month, day, post_slug):
                                                      'new_comment': new_comment,
                                                      'comment_form': comment_form,
                                                      'similar_posts': similar_posts})
-
+@csrf_protect
 def post_share(request, post_id):
     post = get_object_or_404(Post, id=post_id, status="опубликован")
     sent = False
@@ -93,6 +96,7 @@ def post_search(request):
                 .filter(rank__gte=0.3).order_by('-rank')
     return render(request, 'blog/post/search.html', {'form': form, 'query': query, 'results': results})
 
+@csrf_protect
 def create(request):
     if request.method == "POST":
         form = AddPostForm(request.POST)
@@ -103,6 +107,7 @@ def create(request):
         form = AddPostForm()
     return render(request, 'blog/post/add_post.html', {'form': form})
 
+@method_decorator(csrf_exempt, name='dispatch')
 class RegisterUser(CreateView):
     form_class = RegisterUserForm
     template_name = 'blog/post/register.html'
@@ -113,6 +118,7 @@ class RegisterUser(CreateView):
         login(self.request, user)
         return redirect('blog:post_list')
 
+@method_decorator(csrf_exempt, name='dispatch')
 class LoginUser(LoginView):
     form_class = LogonUserForm
     template_name = 'blog/post/login.html'
@@ -120,6 +126,7 @@ class LoginUser(LoginView):
     def get_success_url(self):
         return reverse_lazy('blog:post_list')
 
+@csrf_protect
 def logout_user(request):
     logout(request)
     return redirect('blog:login')
