@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}Авторизация{% endblock %}
+
+{% block content %}
+    <h1>Авторизация</h1>
+    {% if form.errors %}
+        <p>Ваше имя пользователя и пароль не совпадают.Пожалуйста, попробуйте снова.</p>
+    {% else %}
+        <p>Пожалуйста, используйте следующую форму для входа в систему. Если у вас
+        нет учетной записи <a href="{% url 'register' %}">зарегистрируйте ее.</a></p>
+    {% endif %}
+    <div class="mb-3">
+        <form action="{% url 'login' %}" method="post">
+            {{ form.as_p }}
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ next }}">
+            <p><input type="submit" value="Авторизация" class="btn btn-primary mb-3"></p>
+        </form>
+        <p><a href="{% url 'password_reset' %}">Забыли свой пароль?</a></p>
+    </div>
+{% endblock %}

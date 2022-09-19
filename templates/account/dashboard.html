@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+
+{% block title %}Мой профиль{% endblock %}
+
+{% block content %}
+    <h1>Мой профиль</h1>
+    <p> Вы можете <a href="{% url 'edit' %}">отредактировать свой профиль</a> или
+<a href="{% url 'password_change' %}">изменить свой пароль</a>.</p>
+{% endblock %}
