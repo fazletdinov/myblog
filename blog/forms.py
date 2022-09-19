@@ -29,23 +29,20 @@ class AddPostForm(forms.ModelForm):
             'body': forms.Textarea(attrs={'cols': 60, 'rows': 10}),
 
         }
-class RegisterUserForm(UserCreationForm):
-    username = forms.CharField(label='Логин', widget=forms.TextInput(attrs={'class': 'form-input'}))
-    email = forms.EmailField(label='Электронная почта', widget=forms.EmailInput(attrs={'class': 'form-input'}))
-    password1 = forms.CharField(label='Пароль', widget=forms.PasswordInput(attrs={'class': 'form-input'}))
-    password2 = forms.CharField(label='Повторите пароль', widget=forms.PasswordInput(attrs={'class': 'form-input'}))
+class LoginUserForm(forms.Form):
+    username = forms.CharField(label="Имя пользователя")
+    password = forms.CharField(label='Пароль', widget=forms.PasswordInput)
+
+class RegisterUserForm(forms.ModelForm):
+    password = forms.CharField(widget=forms.PasswordInput, label='Пароль')
+    password2 = forms.CharField(widget=forms.PasswordInput, label='Повторите пароль')
 
     class Meta:
         model = User
-        fields = ('username', 'email', 'password1', 'password2')
-        widgets = {
-            'username': forms.TextInput(attrs={'class': 'form-input'}),
-            'password1': forms.PasswordInput(attrs={'class': 'form-input'}),
-            'password2': forms.PasswordInput(attrs={'class': 'form-input'}),
-        }
+        fields = ('username', 'first_name', 'email')
 
-class LogonUserForm(AuthenticationForm):
-    username = forms.CharField(label="Логин", widget=forms.TextInput(attrs={'class': 'form-input'}))
-    password = forms.CharField(label="Введите пароль", widget=forms.PasswordInput(attrs={
-        'class': 'form-input'
-    }))
+    def clean_password2(self):
+        cd = self.cleaned_data
+        if cd['password'] != cd['password2']:
+            raise forms.ValidationError('Пароли не совпадают')
+        return cd['password2']

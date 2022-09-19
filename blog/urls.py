@@ -15,7 +15,7 @@ urlpatterns = [
     path('feed/', LatestPostFeed(), name='post_feed'),
     path('search/', views.post_search, name='post_search'),
     path('create/', views.create, name='post_create'),
-    path('login/', views.LoginUser.as_view(), name='login'),
+    path('login/', views.user_login, name='login'),
     path('logout/', views.logout_user, name='logout'),
-    path('register/', views.RegisterUser.as_view(), name='register'),
+    path('register/', views.register, name='register'),
 ]

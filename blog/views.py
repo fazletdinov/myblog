@@ -12,6 +12,10 @@ from django.contrib.auth.views import LoginView
 from django.urls import reverse_lazy
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from django.utils.decorators import method_decorator
+from django.http import HttpResponse
+from django.contrib.auth import authenticate, login
+
+
 
 def post_list(request, tag_slug=None):
     object_list = Post.published.all()
@@ -39,7 +43,7 @@ class PostListView(ListView):
     paginate_by = 3
     template_name = 'blog/post/list.html'
 
-@csrf_protect
+
 def post_detail(request, year, month, day, post_slug):
     post = get_object_or_404(Post, slug=post_slug, status='опубликован', publish__year=year,
                              publish__month=month, publish__day=day)
@@ -62,7 +66,7 @@ def post_detail(request, year, month, day, post_slug):
                                                      'new_comment': new_comment,
                                                      'comment_form': comment_form,
                                                      'similar_posts': similar_posts})
-@csrf_protect
+
 def post_share(request, post_id):
     post = get_object_or_404(Post, id=post_id, status="опубликован")
     sent = False
@@ -107,7 +111,7 @@ def create(request):
         form = AddPostForm()
     return render(request, 'blog/post/add_post.html', {'form': form})
 
-@method_decorator(csrf_exempt, name='dispatch')
+
 class RegisterUser(CreateView):
     form_class = RegisterUserForm
     template_name = 'blog/post/register.html'
@@ -118,15 +122,48 @@ class RegisterUser(CreateView):
         login(self.request, user)
         return redirect('blog:post_list')
 
-@method_decorator(csrf_exempt, name='dispatch')
+
 class LoginUser(LoginView):
-    form_class = LogonUserForm
+    form_class = LoginUserForm
     template_name = 'blog/post/login.html'
 
     def get_success_url(self):
         return reverse_lazy('blog:post_list')
 
-@csrf_protect
+
 def logout_user(request):
     logout(request)
     return redirect('blog:login')
+
+@csrf_protect
+def register(request):
+    if request.method == "POST":
+        user_form = RegisterUserForm(request.POST)
+        if user_form.is_valid():
+            new_user = user_form.save(commit=False)
+            new_user.set_password(user_form.cleaned_data['password'])
+            new_user.save()
+            return render(request, 'account/register_done.html', {'new_user': new_user})
+    else:
+        user_form = RegisterUserForm()
+        return render(request, 'account/register.html', {'user_form': user_form})
+
+@csrf_protect
+def user_login(request):
+    if request.method == 'POST':
+        form = LoginUserForm(request.POST)
+        if form.is_valid():
+            cd = form.cleaned_data
+            user = authenticate(request, username=cd['username'], password=cd['password'])
+            if user is not None:
+                if user.is_active:
+                    login(request, user)
+                    return HttpResponse('Авторизация прошла успешно')
+                else:
+                    return HttpResponse('Аккаунт неактивен')
+            else:
+                return HttpResponse('Неккоректный логин или пароль')
+
+    else:
+        form = LoginUserForm()
+    return render(request, 'account/login.html', {'form': form})
